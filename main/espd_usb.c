@@ -31,6 +31,7 @@
 #include "tinyusb_cdc_acm.h"
 #include "tinyusb_console.h"
 #include "tinyusb_default_config.h"
+#include "espd_usb_descriptors.h"
 #endif
 #if (CONFIG_ESPD_USE_USB_OTG && CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED) || (CONFIG_ESPD_DEV_SERIAL_SYNC && CONFIG_USJ_ENABLE_USB_SERIAL_JTAG && CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED)
 #include "driver/usb_serial_jtag.h"
@@ -501,6 +502,11 @@ static bool usb_init_on_core0(void)
     tusb_cfg = TINYUSB_DEFAULT_CONFIG();
     tusb_cfg.task = TINYUSB_TASK_CUSTOM(
         TINYUSB_DEFAULT_TASK_SIZE, ESPD_USB_DEVICE_TASK_PRIO, ESPD_USB_TASK_CORE);
+#if CONFIG_ESPD_USE_USB_MIDI
+    /* esp_tinyusb's auto descriptor builder cannot add the MIDI class, so supply
+     * a hand-built composite (CDC [+MSC] + MIDI) descriptor. */
+    espd_usb_apply_midi_descriptor(&tusb_cfg);
+#endif
     err = tinyusb_driver_install(&tusb_cfg);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
         ESP_LOGE(TAG, "TinyUSB install failed: %s", esp_err_to_name(err));

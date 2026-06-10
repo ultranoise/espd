@@ -37,6 +37,9 @@
 #include "tinyusb.h"
 #include "tinyusb_cdc_acm.h"
 #endif
+#if CONFIG_ESPD_USE_USB_MIDI_HOST
+#include "espd_usb_host_midi.h"
+#endif
 
 #include "espd_storage.h"
 
@@ -298,8 +301,27 @@ void app_main(void)
 #endif
 
 #if CONFIG_ESPD_USE_USB_OTG
-    if (!espd_usb_start_after_wifi())
-        ESP_LOGE(TAG, "USB: boot init failed");
+    /* USB role from config.txt: device (TinyUSB CDC+MSC+MIDI, appears on a
+     * computer) vs host (USB-MIDI host for a controller plugged into the board).
+     * Mutually exclusive — one OTG PHY. */
+    bool usb_host_mode = (g_espd_cfg.usb_role == ESPD_USB_ROLE_HOST);
+#if !CONFIG_ESPD_USE_USB_MIDI_HOST
+    if (usb_host_mode) {
+        ESP_LOGW(TAG, "config.txt usb_midi_role=host, but USB-MIDI host not compiled "
+            "(enable ESPD_USE_USB_MIDI_HOST) — falling back to device mode");
+        usb_host_mode = false;
+    }
+#endif
+    if (usb_host_mode) {
+#if CONFIG_ESPD_USE_USB_MIDI_HOST
+        ESP_LOGI(TAG, "USB role: host (USB-MIDI). Serial monitor unavailable while hosting.");
+        if (espd_usb_host_midi_start() != ESP_OK)
+            ESP_LOGE(TAG, "USB host: start failed");
+#endif
+    } else {
+        if (!espd_usb_start_after_wifi())
+            ESP_LOGE(TAG, "USB: boot init failed");
+    }
 #endif
 
 #ifdef ESPD_USE_WIFI

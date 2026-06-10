@@ -7,6 +7,7 @@
 #include "espd.h"
 #include "espd_runtime_config.h"
 #include "espd_usb.h"
+#include "espd_midi.h"
 #include "esp_attr.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -255,6 +256,7 @@ void pdmain_init( void)
     STUFF->st_dacsr = sys_getsr();
     STUFF->st_soundout = soundout;
     STUFF->st_soundin = soundin;
+    espd_midi_init();   /* open USB MIDI in/out; native Pd MIDI objects active */
 
     espd_main_pd_loaded_from_store = 0;
     espd_main_pd_loaded_dir = NULL;
@@ -306,6 +308,7 @@ IRAM_ATTR void pdmain_tick( void)
     //memset(soundout, 0, (size_t)sys_get_outchannels() * DEFDACBLKSIZE * sizeof(t_sample));
     sched_tick();
     sys_pollgui();
+    espd_midi_poll();   /* dispatch inbound USB MIDI + flush outbound MIDI queue */
 }
 
 /* ----------------- stuff to keep Pd happy -------------------- */
@@ -444,6 +447,7 @@ void conf_init(void)
     x_time_setup();
     x_arithmetic_setup();
     x_array_setup();
+    x_midi_setup();
     x_net_setup();
     x_misc_setup();
     x_qlist_setup();
@@ -835,7 +839,8 @@ void glist_settexted(t_glist *gl, t_rtext *x)
 int sys_batch;
 
 void s_inter_newpdinstance( void) {}
-void x_midi_newpdinstance( void) {}
+/* x_midi_newpdinstance() / x_midi_freepdinstance() are provided by the now-compiled
+ * pd/src/x_midi.c (allocates pd_this->pd_midi). */
 
 /* --------------- m_sched.c -------------------- */
 #define TIMEUNITPERMSEC (32. * 441.)

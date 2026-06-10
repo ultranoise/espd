@@ -150,6 +150,45 @@ menu "USB device (OTG)"
                 with the CPU. Rapid dev uses SD only — uncheck if you do not need
                 the drive on the same cable.
 
+        config ESPD_USE_USB_MIDI
+            bool "USB MIDI port (native Pd MIDI objects)"
+            default y
+            help
+                Expose a USB MIDI in/out port so the host sees the device as a
+                MIDI interface and Pd's native MIDI objects ([notein], [ctlin],
+                [noteout], [midiin], ...) work. Runs alongside the CDC serial
+                monitor on the same cable via a composite descriptor.
+
+                Adds one IN + one OUT endpoint. CDC + MSC + MIDI is near the
+                ESP32-S3 endpoint limit; if you hit it, disable USB mass storage.
+
+                Requires CONFIG_TINYUSB_MIDI_COUNT >= 1 (set in the board's
+                sdkconfig.defaults; the build fails loudly otherwise).
+
+        config ESPD_USE_USB_MIDI_HOST
+            bool "USB-MIDI host role (config.txt: usb_midi_role=host)"
+            depends on ESPD_USE_USB_MIDI
+            default y
+            help
+                Compile the USB-MIDI *host* driver in addition to the device
+                stack, so the same firmware can act as either a USB-MIDI device
+                (appears on a computer) or a USB-MIDI host (powers + reads a
+                class-compliant MIDI controller plugged into the board, feeding
+                it into Pd's native MIDI objects).
+
+                The role is chosen at boot from config.txt:
+                    usb_midi_role = device   (default)  -> CDC + MSC + MIDI device
+                    usb_midi_role = host                -> USB-MIDI host
+                The two are mutually exclusive (one OTG PHY) and switching
+                requires a power-cycle.
+
+                IMPORTANT: host mode requires the board to supply 5 V VBUS to the
+                downstream port. If the hardware cannot source VBUS (battery
+                boards often can't), the controller will not power on regardless
+                of this option. While hosting, USB serial monitoring is
+                unavailable (the PHY is busy). Provide a board override of
+                espd_board_usb_host_set_vbus() if a VBUS load switch exists.
+
         config ESPD_USB_CONSOLE_CDC
             bool
             default ESPD_USE_USB_CDC

@@ -1,0 +1,27 @@
+# ESPD board definition — source of truth for components/espd_board_waveshare_s3/
+# Regenerated on every CMake configure (scripts/gen_board_plugins.py).
+
+id: waveshare_s3
+name: Waveshare ESP32-S3-AUDIO
+target: esp32s3
+help: |
+  Waveshare AI Smart Speaker / ESP32-S3-AUDIO Board (ES8311 DAC,
+  ES7210 mic). Fetches esp-bsp via Component Manager.
+
+bsp:
+  component: waveshare_esp32_s3_audio
+  git: https://github.com/ben-wes/esp-bsp.git
+  path: bsp/waveshare_esp32_s3_audio
+  version: espd-bsp
+
+features:
+  imply:
+    - ESPD_USE_ADC
+    - ESPD_USE_SDCARD
+    - ESPD_USE_AIN
+    - ESPD_USE_AOUT
+    - ESPD_USE_WIFI
+    - ESPD_USE_USB_OTG
+
+io:
+  buttons: [VOLUP, PLAY, VOLDOWN]

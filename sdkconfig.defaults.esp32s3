@@ -20,6 +20,10 @@ CONFIG_PTHREAD_TASK_CORE_DEFAULT=0
 CONFIG_WL_SECTOR_SIZE_4096=y
 CONFIG_TINYUSB_MSC_BUFSIZE=8192
 
+# TinyUSB MIDI device class (1 interface) — compiles tud_midi_*; the espd-level
+# ESPD_USE_USB_MIDI option decides whether the MIDI interface is exposed.
+CONFIG_TINYUSB_MIDI_COUNT=1
+
 # ESP32-S3 CPU Frequency (240 MHz)
 CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
 
