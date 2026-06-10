@@ -6,6 +6,7 @@
 #include "espd_usb.h"
 #include "espd.h"
 #include "espd_storage.h"
+#include "espd_config_file.h"
 
 #include "esp_log.h"
 #include "esp_err.h"
@@ -504,8 +505,10 @@ static bool usb_init_on_core0(void)
         TINYUSB_DEFAULT_TASK_SIZE, ESPD_USB_DEVICE_TASK_PRIO, ESPD_USB_TASK_CORE);
 #if CONFIG_ESPD_USE_USB_MIDI
     /* esp_tinyusb's auto descriptor builder cannot add the MIDI class, so supply
-     * a hand-built composite (CDC [+MSC] + MIDI) descriptor. */
-    espd_usb_apply_midi_descriptor(&tusb_cfg);
+     * a hand-built composite (CDC [+MSC] + MIDI) descriptor when MIDI is enabled
+     * at runtime (usb_midi_role=device). */
+    if (espd_usb_midi_enabled())
+        espd_usb_apply_midi_descriptor(&tusb_cfg);
 #endif
     err = tinyusb_driver_install(&tusb_cfg);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {

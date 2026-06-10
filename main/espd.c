@@ -301,8 +301,8 @@ void app_main(void)
 #endif
 
 #if CONFIG_ESPD_USE_USB_OTG
-    /* USB role from config.txt: device (TinyUSB CDC+MSC+MIDI, appears on a
-     * computer) vs host (USB-MIDI host for a controller plugged into the board).
+    /* USB role from config.txt: nomidi (TinyUSB CDC+MSC only), device (CDC+MSC+MIDI),
+     * or host (USB-MIDI host for a controller plugged into the board).
      * Mutually exclusive — one OTG PHY. */
     bool usb_host_mode = (g_espd_cfg.usb_role == ESPD_USB_ROLE_HOST);
 #if !CONFIG_ESPD_USE_USB_MIDI_HOST
@@ -319,6 +319,8 @@ void app_main(void)
             ESP_LOGE(TAG, "USB host: start failed");
 #endif
     } else {
+        const char *role_name = (g_espd_cfg.usb_role == ESPD_USB_ROLE_DEVICE) ? "device (CDC+MSC+MIDI)" : "nomidi (CDC+MSC only)";
+        ESP_LOGI(TAG, "USB role: %s", role_name);
         if (!espd_usb_start_after_wifi())
             ESP_LOGE(TAG, "USB: boot init failed");
     }

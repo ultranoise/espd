@@ -154,10 +154,14 @@ menu "USB device (OTG)"
             bool "USB MIDI port (native Pd MIDI objects)"
             default y
             help
-                Expose a USB MIDI in/out port so the host sees the device as a
-                MIDI interface and Pd's native MIDI objects ([notein], [ctlin],
+                Compile the USB MIDI device class so the host can see the device
+                as a MIDI interface and Pd's native MIDI objects ([notein], [ctlin],
                 [noteout], [midiin], ...) work. Runs alongside the CDC serial
                 monitor on the same cable via a composite descriptor.
+
+                MIDI can be disabled at runtime via config.txt (usb_midi_role=nomidi)
+                to free endpoints or reduce USB descriptor complexity, while keeping
+                CDC and MSC enabled.
 
                 Adds one IN + one OUT endpoint. CDC + MSC + MIDI is near the
                 ESP32-S3 endpoint limit; if you hit it, disable USB mass storage.
@@ -177,9 +181,10 @@ menu "USB device (OTG)"
                 it into Pd's native MIDI objects).
 
                 The role is chosen at boot from config.txt:
-                    usb_midi_role = device   (default)  -> CDC + MSC + MIDI device
+                    usb_midi_role = nomidi  (default)  -> CDC + MSC only (no MIDI)
+                    usb_midi_role = device              -> CDC + MSC + MIDI device
                     usb_midi_role = host                -> USB-MIDI host
-                The two are mutually exclusive (one OTG PHY) and switching
+                The three are mutually exclusive (one OTG PHY) and switching
                 requires a power-cycle.
 
                 IMPORTANT: host mode requires the board to supply 5 V VBUS to the

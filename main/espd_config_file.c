@@ -56,7 +56,7 @@ void espd_config_load(void)
 
     /* Defaults: -1 means "not set in config.txt, use compiled default". */
     memset(&g_espd_cfg, 0, sizeof(g_espd_cfg));
-    g_espd_cfg.usb_role            = ESPD_USB_ROLE_DEVICE;
+    g_espd_cfg.usb_role            = ESPD_USB_ROLE_NOMIDI;
     g_espd_cfg.audio_dma_desc_num  = -1;
     g_espd_cfg.audio_dma_frame_num = -1;
     g_espd_cfg.audio_sample_rate   = -1;
@@ -97,13 +97,15 @@ void espd_config_load(void)
         v = cfg_trim(eq);
         k = cfg_trim(k);
 
-        /* USB MIDI role: device (default) | host */
+        /* USB MIDI role: nomidi (default) | device | host */
         if (!strcmp(k, "usb_midi_role"))
         {
             if (!strcasecmp(v, "host"))
                 g_espd_cfg.usb_role = ESPD_USB_ROLE_HOST;
-            else
+            else if (!strcasecmp(v, "device"))
                 g_espd_cfg.usb_role = ESPD_USB_ROLE_DEVICE;
+            else
+                g_espd_cfg.usb_role = ESPD_USB_ROLE_NOMIDI;
         }
 
         /* WiFi */

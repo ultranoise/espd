@@ -7,8 +7,8 @@
  * outgoing MIDI back to the controller.
  *
  * This is the mutually-exclusive counterpart to the TinyUSB *device* stack
- * (CDC + MSC + MIDI). The role is selected at boot from config.txt
- * (usb_midi_role = device|host); only one may run because the ESP32-S3 has a single
+ * (CDC + MSC [+ MIDI]). The role is selected at boot from config.txt
+ * (usb_midi_role = nomidi|device|host); only one may run because the ESP32-S3 has a single
  * USB-OTG PHY. While hosting, USB serial monitoring is unavailable.
  */
 #pragma once
